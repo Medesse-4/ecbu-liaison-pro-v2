@@ -11,7 +11,7 @@
 {% if current_user.is_authenticated %}
 <nav class="navbar navbar-expand-xl navbar-dark app-navbar shadow-sm">
   <div class="container-fluid">
-    <a class="navbar-brand fw-black" href="{{ url_for('dashboard.home') }}"><span class="brand-mark">EC</span> ECBU Liaison Pro V2</a>
+    <a class="navbar-brand fw-black" href="{{ url_for('dashboard.home') }}"><span class="brand-mark">EC</span> Plateforme ECBU</a>
     <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
     <div id="nav" class="collapse navbar-collapse">
       <ul class="navbar-nav me-auto">
@@ -19,11 +19,13 @@
           <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.users') }}">Utilisateurs</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('tickets.index') }}">Suggestions</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('audit.index') }}">Audit sécurité</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('chat.index') }}">Messagerie</a></li>
           <li class="nav-item"><a class="nav-link text-warning fw-bold" href="{{ url_for('admin.reset_site') }}">Réinitialiser</a></li>
         {% elif current_user.role == 'prescripteur' %}
           <li class="nav-item"><a class="nav-link" href="{{ url_for('requests.index') }}">Mes demandes</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('results.index') }}">Mes résultats</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('tickets.index') }}">Support</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('chat.index') }}">Messagerie</a></li>
         {% elif current_user.role in ['laboratoire','chef_labo'] %}
           <li class="nav-item"><a class="nav-link" href="{{ url_for('requests.index') }}">Demandes reçues</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('samples.index') }}">Échantillons</a></li>
@@ -31,9 +33,8 @@
           <li class="nav-item"><a class="nav-link" href="{{ url_for('antibiograms.index') }}">Antibiorésistance</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('statistics.index') }}">Statistiques labo</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('quality.non_conformities') }}">Qualité</a></li>
-        {% elif current_user.role == 'responsable_qualite' %}
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('quality.non_conformities') }}">Non-conformités</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('quality.capa') }}">CAPA</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('results.export_csv') }}">Export labo</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('chat.index') }}">Messagerie</a></li>
         {% endif %}
       </ul>
       <ul class="navbar-nav">

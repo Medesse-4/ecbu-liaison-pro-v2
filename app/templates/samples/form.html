@@ -1,1 +1,9 @@
-{% extends 'base.html' %}{% block content %}<h1>Réception échantillon — {{ req.request_number }}</h1><form method="post" class="card card-body row g-3">{{ form.hidden_tag() }}{% for f in form if f.name not in ['csrf_token','submit'] %}<div class="col-md-4">{{ f.label(class='form-label') }}{{ f(class='form-control') }}</div>{% endfor %}<div>{{ form.submit(class='btn btn-primary') }}</div></form>{% endblock %}
+{% extends 'base.html' %}{% block title %}Réception échantillon{% endblock %}{% block content %}
+<div class="hero-panel mb-4"><div><span class="eyebrow">Réception laboratoire</span><h1>Réception et conformité — {{ req.request_number }}</h1><p>La conformité est calculée automatiquement à partir des critères pré-analytiques cochés.</p></div></div>
+<form method="post" class="card pro-card"><div class="card-body row g-3">{{ form.hidden_tag() }}
+  <div class="col-12 section-title">Identification de l’échantillon</div>
+  {% for name in ['sample_number','sample_type','sampling_date','sampling_time','reception_date','reception_time','transport_condition','storage_temperature'] %}<div class="col-md-3">{{ form[name].label(class='form-label') }}{{ form[name](class='form-control') }}</div>{% endfor %}
+  <div class="col-12 section-title">Analyse de conformité du prélèvement</div>
+  {% for name in ['patient_informed','technique_mastered','intimate_toilet','sterile_container','identified_container','sufficient_volume','no_leakage','delay_compliant','temperature_compliant','transport_compliant','sample_nature_compliant'] %}<div class="col-md-4"><div class="quality-check">{{ form[name](class='form-check-input') }} {{ form[name].label(class='form-check-label') }}</div></div>{% endfor %}
+  <div class="col-12"><button class="btn btn-primary btn-lg">Enregistrer la réception</button></div>
+</div></form>{% endblock %}

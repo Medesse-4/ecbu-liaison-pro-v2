@@ -1,0 +1,25 @@
+PATCH PROFESSIONNEL ECBU LIAISON PRO V2
+
+Corrections incluses :
+1. Formulaire prescripteur enrichi : sonde, antibiothérapie, hospitalisation, hôpital, service, commune, diagnostic, date de prélèvement.
+2. Questionnaire de conformité séparé côté réception laboratoire : patient informé, toilette intime, flacon, volume, délai, température, transport, nature du prélèvement.
+3. Décision automatique conformité / non-conformité à la réception.
+4. Bon de résultat A4 sur une seule page, sans nom de l'application et sans date de réception.
+5. Nom du laboratoire saisissable par le laboratoire et affiché sur le bon.
+6. Germe isolé affiché uniquement si culture positive.
+7. Antibiogramme affiché uniquement si culture positive.
+8. Prélèvement rejeté : pas de bon, notification au prescripteur avec motif.
+9. Export laboratoire CSV enrichi.
+10. Messagerie interne sécurisée avec assistant de suivi par numéro de demande.
+11. Responsable qualité supprimé des choix de rôles ; qualité rattachée au laboratoire/chef laboratoire.
+
+IMPORTANT : ce patch ne contient ni .github, ni __pycache__, ni logs.
+
+Après remplacement des fichiers :
+python -m compileall app run.py config.py extensions.py
+git rm --cached -r .github __pycache__ app/__pycache__ logs 2>$null
+git add .
+git commit -m "Ameliore demande conformite bon export et messagerie"
+git push
+
+Sur Render, utilisez PostgreSQL via DATABASE_URL pour conserver les comptes et données après redémarrage.

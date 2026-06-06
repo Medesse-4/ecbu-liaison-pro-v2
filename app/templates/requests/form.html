@@ -1,1 +1,14 @@
-{% extends 'base.html' %}{% block content %}<h1>Nouvelle demande ECBU</h1><div class="card"><div class="card-body"><form method="post" class="row g-3">{{ form.hidden_tag() }}{% for f in form if f.name not in ['csrf_token','submit'] %}<div class="col-md-4"><label class="form-label">{{ f.label.text }}</label>{{ f(class='form-control') }}</div>{% endfor %}<div class="col-12">{{ form.submit(class='btn btn-primary') }}</div></form></div></div>{% endblock %}
+{% extends 'base.html' %}{% block title %}Demande ECBU{% endblock %}{% block content %}
+<div class="hero-panel mb-4"><div><span class="eyebrow">Prescription ECBU</span><h1>Fiche de demande d’examen</h1><p>Renseignez les informations cliniques utiles au laboratoire. Les informations de conformité à la réception restent séparées et seront évaluées par le laboratoire.</p></div></div>
+<form method="post" class="card pro-card"><div class="card-body row g-3">{{ form.hidden_tag() }}
+  <div class="col-12 section-title">Identification patient</div>
+  {% for name in ['patient_name','patient_firstname','patient_sex','patient_age','patient_age_unit','patient_phone','patient_code'] %}<div class="col-md-4">{{ form[name].label(class='form-label') }}{{ form[name](class='form-control') }}</div>{% endfor %}
+  <div class="col-12 section-title">Origine et prélèvement</div>
+  {% for name in ['hospital_name','requesting_service','origin_commune','sample_nature','patient_probe','sampling_code','sampling_date'] %}<div class="col-md-4">{{ form[name].label(class='form-label') }}{{ form[name](class='form-control') }}</div>{% endfor %}
+  <div class="col-12 section-title">Renseignements cliniques</div>
+  {% for name in ['consultation_reason','general_signs','underlying_chronic_disease','main_diagnosis','clinical_context'] %}<div class="col-md-6">{{ form[name].label(class='form-label') }}{{ form[name](class='form-control', rows='3') }}</div>{% endfor %}
+  <div class="col-12 section-title">Hospitalisation et antibiothérapie</div>
+  {% for name in ['recent_hospitalization','recent_hospitalization_duration','currently_hospitalized','current_hospitalization_duration','antibiotic_treatment','antibiotic_duration'] %}<div class="col-md-4">{{ form[name].label(class='form-label') }}{{ form[name](class='form-control') }}</div>{% endfor %}
+  <div class="col-md-6">{{ form.prescriber_name.label(class='form-label') }}{{ form.prescriber_name(class='form-control') }}</div><div class="col-md-6 form-check mt-5">{{ form.urgent(class='form-check-input') }} {{ form.urgent.label(class='form-check-label') }}</div>
+  <div class="col-12"><button class="btn btn-primary btn-lg">Envoyer au laboratoire</button></div>
+</div></form>{% endblock %}

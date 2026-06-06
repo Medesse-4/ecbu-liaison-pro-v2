@@ -59,9 +59,10 @@ def register_blueprints(app):
     from app.antibiograms.routes import bp as antibiograms_bp
     from app.tickets.routes import bp as tickets_bp
     from app.notifications.routes import bp as notifications_bp
+    from app.chat.routes import bp as chat_bp
     from app.audit.routes import bp as audit_bp
     from app.api.routes import bp as api_bp
-    for bp in [auth_bp, dashboard_bp, admin_bp, requests_bp, samples_bp, results_bp, quality_bp, statistics_bp, antibiograms_bp, tickets_bp, notifications_bp, audit_bp, api_bp]:
+    for bp in [auth_bp, dashboard_bp, admin_bp, requests_bp, samples_bp, results_bp, quality_bp, statistics_bp, antibiograms_bp, tickets_bp, notifications_bp, chat_bp, audit_bp, api_bp]:
         app.register_blueprint(bp)
 
 
@@ -89,40 +90,55 @@ def seed_admin(app):
 
 
 def ensure_runtime_schema(app):
-    """Ajoute les colonnes non destructives nécessaires si une base locale existait déjà."""
+    """Ajoute uniquement des colonnes/tables non destructives pour préserver les données existantes."""
     engine = db.engine
     inspector = db.inspect(engine)
-    if "users" not in inspector.get_table_names():
+    tables = set(inspector.get_table_names())
+    if "users" not in tables:
         return
-    cols = {c["name"] for c in inspector.get_columns("users")}
-    additions = {
-        "deletion_requested_at": "DATETIME",
-        "deletion_reason": "TEXT",
-        "deletion_confirmed_by_id": "INTEGER",
-        "deletion_confirmed_at": "DATETIME",
-    }
-    with engine.begin() as conn:
-        for col, ddl in additions.items():
-            if col not in cols:
-                conn.execute(text(f"ALTER TABLE users ADD COLUMN {col} {ddl}"))
 
-    table_additions = {
+    additions_by_table = {
+        "users": {
+            "deletion_requested_at": "DATETIME",
+            "deletion_reason": "TEXT",
+            "deletion_confirmed_by_id": "INTEGER",
+            "deletion_confirmed_at": "DATETIME",
+        },
         "ecbu_requests": {
+            "hospital_name": "VARCHAR(180)",
+            "origin_commune": "VARCHAR(160)",
+            "sample_nature": "VARCHAR(80)",
+            "patient_probe": "VARCHAR(40)",
+            "consultation_reason": "TEXT",
+            "general_signs": "TEXT",
+            "recent_hospitalization": "VARCHAR(40)",
+            "recent_hospitalization_duration": "VARCHAR(80)",
+            "currently_hospitalized": "VARCHAR(40)",
+            "current_hospitalization_duration": "VARCHAR(80)",
+            "antibiotic_treatment": "VARCHAR(40)",
+            "antibiotic_duration": "VARCHAR(80)",
+            "underlying_chronic_disease": "TEXT",
+            "main_diagnosis": "TEXT",
+            "sampling_date": "DATE",
             "deleted_by_id": "INTEGER",
             "delete_reason": "TEXT",
         },
         "lab_results": {
+            "laboratory_name": "VARCHAR(180)",
+            "isolated_germ": "VARCHAR(180)",
+            "rejection_reason": "TEXT",
             "deleted_at": "DATETIME",
             "deleted_by_id": "INTEGER",
             "delete_reason": "TEXT",
         },
     }
-    tables = set(inspector.get_table_names())
     with engine.begin() as conn:
-        for table, wanted in table_additions.items():
+        for table, additions in additions_by_table.items():
             if table not in tables:
                 continue
             existing = {c["name"] for c in inspector.get_columns(table)}
-            for col, ddl in wanted.items():
+            for col, ddl in additions.items():
                 if col not in existing:
                     conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {ddl}"))
+
+    # La table de messagerie est créée par SQLAlchemy si elle n'existe pas.
