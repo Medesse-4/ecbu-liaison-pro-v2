@@ -1,0 +1,18 @@
+{% extends 'base.html' %}{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="security-panel p-4 p-md-5">
+      <div class="d-flex align-items-center gap-3 mb-3"><div class="danger-icon">!</div><div><h1 class="page-title mb-1">Réinitialisation du site</h1><p class="text-muted mb-0">Action réservée à l’administrateur système.</p></div></div>
+      <div class="alert alert-danger"><b>Attention :</b> cette action supprime les demandes, résultats, échantillons, antibiogrammes, non-conformités, CAPA, notifications et tickets. L’administrateur ne consulte aucune donnée clinique ou laboratoire pendant cette opération.</div>
+      <div class="alert alert-secondary">Les comptes utilisateurs et le journal d’audit de sécurité sont conservés.</div>
+      <form method="post" onsubmit="return confirm('Confirmer la réinitialisation du site ?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label class="form-label fw-bold">Tapez exactement REINITIALISER pour confirmer</label>
+        <input class="form-control form-control-lg mb-3" name="confirmation" autocomplete="off" required>
+        <button class="btn btn-danger btn-lg">Réinitialiser le site</button>
+        <a class="btn btn-outline-secondary btn-lg" href="{{ url_for('dashboard.home') }}">Annuler</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

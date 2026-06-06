@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="hero-card mb-4">
+  <div>
+    <div class="eyebrow">Demande d’examen</div>
+    <h1 class="page-title mb-1">Fiche de demande ECBU</h1>
+    <p class="mb-0 text-muted">Renseignez les informations cliniques utiles à l’analyse et à la traçabilité du prélèvement.</p>
+  </div>
+</div>
+<form method="post" class="card card-body request-form">
+  {{ form.hidden_tag() }}
+  <h5 class="form-section-title">Patient</h5>
+  <div class="row g-3">
+    {% for name in ['patient_name','patient_firstname','patient_sex','patient_age','patient_age_unit','patient_phone'] %}
+      {% set f = form[name] %}<div class="col-md-4">{{ f.label(class='form-label') }}{{ f(class='form-control') }}</div>
+    {% endfor %}
+  </div>
+  <h5 class="form-section-title mt-4">Provenance et prélèvement</h5>
+  <div class="row g-3">
+    {% for name in ['hospital_origin','requesting_service','prescriber_name','sample_nature','sampling_code','patient_code','provenance_commune','sampling_date'] %}
+      {% set f = form[name] %}<div class="col-md-4">{{ f.label(class='form-label') }}{{ f(class='form-control') }}</div>
+    {% endfor %}
+    <div class="col-md-12">{{ form.postoperative_suppuration_details.label(class='form-label') }}{{ form.postoperative_suppuration_details(class='form-control', rows='2') }}</div>
+  </div>
+  <h5 class="form-section-title mt-4">Renseignements cliniques</h5>
+  <div class="row g-3">
+    <div class="col-md-6">{{ form.consultation_reason.label(class='form-label') }}{{ form.consultation_reason(class='form-control', rows='3') }}</div>
+    <div class="col-md-6">{{ form.general_signs.label(class='form-label') }}{{ form.general_signs(class='form-control', rows='3') }}</div>
+    {% for name in ['recent_hospitalization_before_admission','recent_hospitalization_duration','currently_hospitalized','current_hospitalization_duration','antibiotic_treatment','current_atb_duration','previous_episode_6_months','current_episode'] %}
+      {% set f = form[name] %}<div class="col-md-3">{{ f.label(class='form-label') }}{{ f(class='form-control') }}</div>
+    {% endfor %}
+    <div class="col-md-6">{{ form.chronic_underlying_disease.label(class='form-label') }}{{ form.chronic_underlying_disease(class='form-control', rows='3') }}</div>
+    <div class="col-md-6">{{ form.main_diagnosis.label(class='form-label') }}{{ form.main_diagnosis(class='form-control', rows='3') }}</div>
+    <div class="col-md-12">{{ form.clinical_context.label(class='form-label') }}{{ form.clinical_context(class='form-control', rows='3') }}</div>
+    <div class="col-md-12 form-check ms-2 mt-3">{{ form.urgent(class='form-check-input') }} {{ form.urgent.label(class='form-check-label fw-bold') }}</div>
+  </div>
+  <div class="mt-4">{{ form.submit(class='btn btn-primary btn-lg') }}</div>
+</form>
+{% endblock %}

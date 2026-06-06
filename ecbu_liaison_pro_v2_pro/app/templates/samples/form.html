@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="hero-card mb-4">
+  <div>
+    <div class="eyebrow">Réception laboratoire</div>
+    <h1 class="page-title mb-1">Contrôle de l’échantillon — {{ req.request_number }}</h1>
+    <p class="mb-0 text-muted">L’évaluation de conformité est calculée automatiquement à partir des critères cochés.</p>
+  </div>
+</div>
+<form method="post" class="card card-body row g-3 sample-form">
+  {{ form.hidden_tag() }}
+  <h5 class="form-section-title">Identification de l’échantillon</h5>
+  {% for name in ['sample_number','sample_type','sampling_date','sampling_time','reception_date','reception_time','transport_condition','storage_temperature'] %}
+    {% set f = form[name] %}<div class="col-md-3">{{ f.label(class='form-label') }}{{ f(class='form-control') }}</div>
+  {% endfor %}
+  <h5 class="form-section-title mt-4">Conformité pré-analytique</h5>
+  <div class="col-12"><div class="quality-grid">
+    {% for field,label in quality_fields %}
+      {% set f = form[field] %}
+      <label class="quality-check">{{ f(class='form-check-input') }} <span>{{ label }}</span></label>
+    {% endfor %}
+  </div></div>
+  <div class="col-12">{{ form.conformity_comment.label(class='form-label') }}{{ form.conformity_comment(class='form-control', rows='3') }}</div>
+  <div class="col-12"><button class="btn btn-primary btn-lg">Enregistrer la réception</button></div>
+</form>
+{% endblock %}

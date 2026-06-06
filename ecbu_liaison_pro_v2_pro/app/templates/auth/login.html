@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Connexion{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card card shadow-lg border-0">
+    <div class="card-body p-4 p-md-5">
+      <div class="text-center mb-4">
+        <div class="auth-logo mx-auto mb-3">EC</div>
+        <h1 class="h3 fw-bold mb-1">Connexion</h1>
+        <p class="text-muted mb-0">Accès sécurisé à ECBU Liaison Pro V2</p>
+      </div>
+      <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="mb-3">{{ form.email.label(class='form-label fw-semibold') }}{{ form.email(class='form-control form-control-lg', autocomplete='username') }}</div>
+        <div class="mb-4">{{ form.password.label(class='form-label fw-semibold') }}{{ form.password(class='form-control form-control-lg', autocomplete='current-password') }}</div>
+        {{ form.submit(class='btn btn-primary btn-lg w-100') }}
+      </form>
+      <p class="text-center mt-4 mb-0"><a href="{{ url_for('auth.register') }}">Créer un compte professionnel</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

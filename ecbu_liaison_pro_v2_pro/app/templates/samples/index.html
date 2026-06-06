@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<h1>Échantillons</h1><table class="table"><tr><th>N°</th><th>Demande</th><th>QR</th><th>Statut</th></tr>{% for s in samples %}<tr><td>{{ s.sample_number }}</td><td>{{ s.request.request_number }}</td><td><code>{{ s.qr_code[:16] }}...</code></td><td>{{ s.status }}</td></tr>{% endfor %}</table>{% endblock %}

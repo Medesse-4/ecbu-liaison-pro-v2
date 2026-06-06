@@ -1,0 +1,13 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="page-title mb-4">Tableau de bord</h1>
+{% if mode == 'admin' %}
+<div class="row g-3">{% for label,key in [('Utilisateurs','users'),('Comptes en attente','pending_users'),('Comptes actifs','active_users'),('Suppressions demandées','delete_requests')] %}<div class="col-md-3"><div class="stat-card"><div class="accent"></div><div class="card-body"><div class="text-muted">{{ label }}</div><div class="display-6 fw-bold">{{ data[key] }}</div></div></div></div>{% endfor %}</div>
+{% elif mode == 'prescripteur' %}
+<div class="row g-3">{% for label,key in [('Mes demandes','my_requests'),('Résultats validés','validated'),('En cours','pending'),('Rejets','rejected')] %}<div class="col-md-3"><div class="stat-card"><div class="accent"></div><div class="card-body"><div class="text-muted">{{ label }}</div><div class="display-6 fw-bold">{{ data[key] }}</div></div></div></div>{% endfor %}</div>
+{% elif mode == 'laboratoire' %}
+<div class="row g-3">{% for label,key in [('Demandes','total_requests'),('Échantillons','samples'),('Validés','validated'),('Rejets','rejected'),('Non-conformités','non_conformities'),('Résistances R','resistant')] %}<div class="col-md-2"><div class="stat-card"><div class="accent"></div><div class="card-body"><div class="text-muted">{{ label }}</div><div class="display-6 fw-bold">{{ data[key] }}</div></div></div></div>{% endfor %}</div>
+<div class="card mt-4"><div class="card-body"><h2 class="h5 fw-bold">Indicateurs laboratoire et antibiorésistance</h2><canvas id="overviewChart" height="90"></canvas></div></div><script>new Chart(document.getElementById('overviewChart'),{type:'bar',data:{labels:['Demandes','Échantillons','Validés','Rejets','NC','R'],datasets:[{label:'Indicateurs',data:[{{ data.total_requests }},{{ data.samples }},{{ data.validated }},{{ data.rejected }},{{ data.non_conformities }},{{ data.resistant }}]}]}});</script>
+{% else %}
+<div class="row g-3"><div class="col-md-4"><div class="stat-card"><div class="accent"></div><div class="card-body"><div class="text-muted">Non-conformités</div><div class="display-6 fw-bold">{{ data.non_conformities }}</div></div></div></div><div class="col-md-4"><div class="stat-card"><div class="accent"></div><div class="card-body"><div class="text-muted">Ouvertes</div><div class="display-6 fw-bold">{{ data.open_nc }}</div></div></div></div></div>
+{% endif %}
+{% endblock %}
