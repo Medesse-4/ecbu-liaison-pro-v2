@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% block title %}Paramètres du bon{% endblock %}{% block content %}
+<div class="hero-panel mb-4"><div><span class="eyebrow">Configuration laboratoire</span><h1>Paramètres permanents du compte rendu</h1><p>Ces informations apparaîtront sur les bons de résultats validés par votre laboratoire.</p></div></div>
+<form method="post" class="card pro-card"><div class="card-body row g-3">{{ form.hidden_tag() }}
+  <div class="col-md-6">{{ form.hospital_name.label(class='form-label') }}{{ form.hospital_name(class='form-control') }}</div>
+  <div class="col-md-6">{{ form.laboratory_name.label(class='form-label') }}{{ form.laboratory_name(class='form-control') }}</div>
+  <div class="col-md-6">{{ form.validator_title.label(class='form-label') }}{{ form.validator_title(class='form-control', placeholder='Biologiste médical / Technicien supérieur...') }}</div>
+  <div class="col-md-6">{{ form.signature_text.label(class='form-label') }}{{ form.signature_text(class='form-control', placeholder='Signature électronique ou mention de validation') }}</div>
+  <div class="col-12"><button class="btn btn-primary btn-lg">Enregistrer</button></div>
+</div></form>
+{% endblock %}

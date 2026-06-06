@@ -16,7 +16,7 @@ def next_request_number():
 
 @bp.route("/")
 @login_required
-@role_required("prescripteur", "laboratoire", "chef_labo")
+@role_required("prescripteur", "laboratoire")
 def index():
     q = request.args.get("q", "").strip()
     page = request.args.get("page", 1, type=int)

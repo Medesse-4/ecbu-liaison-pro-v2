@@ -19,7 +19,7 @@ def home():
         q = EcbuRequest.query.filter_by(created_by_id=current_user.id, deleted_at=None)
         data = {"my_requests": q.count(), "validated": q.filter_by(status="validated").count(), "pending": q.filter(EcbuRequest.status != "validated").count(), "rejected": q.filter_by(status="rejected").count()}
         return render_template("dashboard/home.html", data=data, mode="prescripteur")
-    if current_user.role in ("laboratoire", "chef_labo"):
+    if current_user.role == "laboratoire":
         data = {"total_requests": EcbuRequest.query.filter_by(deleted_at=None).count(), "samples": Sample.query.count(), "validated": EcbuRequest.query.filter_by(status="validated", deleted_at=None).count(), "rejected": EcbuRequest.query.filter_by(status="rejected", deleted_at=None).count(), "non_conformities": NonConformity.query.count(), "resistant": Antibiogram.query.filter_by(interpretation="R").count()}
         return render_template("dashboard/home.html", data=data, mode="laboratoire")
     data = {"non_conformities": NonConformity.query.count(), "open_nc": NonConformity.query.filter_by(status="open").count()}

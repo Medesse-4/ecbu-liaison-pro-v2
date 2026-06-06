@@ -25,14 +25,14 @@ ANTIBIOTICS = [
 
 @bp.route("/")
 @login_required
-@role_required("laboratoire", "chef_labo")
+@role_required("laboratoire")
 def index():
     rows = Antibiogram.query.order_by(Antibiogram.id.desc()).limit(300).all()
     return render_template("antibiograms/index.html", rows=rows)
 
 @bp.route("/edit/<int:result_id>", methods=["GET", "POST"])
 @login_required
-@role_required("laboratoire", "chef_labo")
+@role_required("laboratoire")
 def edit(result_id):
     result = db.session.get(LabResult, result_id)
     if not result:

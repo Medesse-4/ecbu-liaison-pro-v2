@@ -12,8 +12,8 @@ def visible_messages_query():
     q = InternalMessage.query
     if current_user.role == "admin":
         return q.filter(or_(InternalMessage.sender_id == current_user.id, InternalMessage.recipient_role == "admin", InternalMessage.recipient_user_id == current_user.id))
-    if current_user.role == "laboratoire" or current_user.role == "chef_labo":
-        return q.filter(or_(InternalMessage.sender_id == current_user.id, InternalMessage.recipient_role.in_(["laboratoire", "chef_labo"]), InternalMessage.recipient_user_id == current_user.id))
+    if current_user.role == "laboratoire" or current_user.role == "laboratoire":
+        return q.filter(or_(InternalMessage.sender_id == current_user.id, InternalMessage.recipient_role.in_(["laboratoire"]), InternalMessage.recipient_user_id == current_user.id))
     return q.filter(or_(InternalMessage.sender_id == current_user.id, InternalMessage.recipient_user_id == current_user.id))
 
 def build_ai_response(request_number):
@@ -50,7 +50,7 @@ def index():
     form = InternalMessageForm()
     if current_user.role == "admin":
         form.recipient_role.choices = [("laboratoire", "Laboratoire"), ("prescripteur", "Prescripteur")]
-    elif current_user.role in ("laboratoire", "chef_labo"):
+    elif current_user.role == "laboratoire":
         form.recipient_role.choices = [("prescripteur", "Prescripteur"), ("admin", "Administrateur")]
     else:
         form.recipient_role.choices = [("laboratoire", "Laboratoire"), ("admin", "Administrateur")]

@@ -2,7 +2,8 @@
 <div class="no-print text-center mb-3"><button class="btn btn-primary" onclick="print()">Imprimer / Enregistrer en PDF</button></div>
 <div class="report-a4">
   <header class="report-header-clean">
-    <div class="lab-name">{{ result.laboratory_name or 'LABORATOIRE DE BIOLOGIE MÉDICALE' }}</div>
+    <div class="hospital-name">{{ result.hospital_name_on_report or req.hospital_name or 'Établissement de santé' }}</div>
+    <div class="lab-name">{{ result.laboratory_name or 'Laboratoire de biologie médicale' }}</div>
     <div class="report-name">Compte rendu d’examen cytobactériologique des urines</div>
   </header>
   <section class="report-meta">
@@ -10,7 +11,7 @@
     <div><b>N° demande :</b> {{ req.request_number }}</div>
     <div><b>Sexe / Âge :</b> {{ req.patient_sex }} / {{ req.patient_age }} {{ req.patient_age_unit }}</div>
     <div><b>N° échantillon :</b> {{ req.samples[0].sample_number if req.samples else '—' }}</div>
-    <div><b>Hôpital / Service :</b> {{ req.hospital_name or '—' }} / {{ req.requesting_service or '—' }}</div>
+    <div><b>Service demandeur :</b> {{ req.requesting_service or '—' }}</div>
     <div><b>Prescripteur :</b> {{ req.prescriber_name or '—' }}</div>
     <div><b>Nature du prélèvement :</b> {{ req.sample_nature or 'Urines' }}</div>
     <div><b>Date du prélèvement :</b> {{ req.sampling_date or '—' }}</div>
@@ -22,5 +23,5 @@
   <section class="report-block compact"><h2>Culture</h2><p><b>Résultat :</b> {{ {'positive':'Positive','negative':'Négative','contaminated':'Contaminée'}.get(result.culture_status, result.culture_status or '—') }}</p>{% if result.culture_status == 'positive' %}<p><b>Germe isolé :</b> {{ result.isolated_germ or result.culture_details or '—' }}</p>{% endif %}{% if result.culture_status != 'positive' and result.culture_details %}<p>{{ result.culture_details }}</p>{% endif %}</section>
   {% if result.culture_status == 'positive' %}<section class="report-block compact"><h2>Antibiogramme</h2><div class="atb-three"><div><b>Sensibles</b><br>{% for a in groups.S %}{{ a.antibiotic }}{% if a.diameter %} ({{ a.diameter }} mm){% endif %}<br>{% else %}—{% endfor %}</div><div><b>Intermédiaires</b><br>{% for a in groups.I %}{{ a.antibiotic }}{% if a.diameter %} ({{ a.diameter }} mm){% endif %}<br>{% else %}—{% endfor %}</div><div><b>Résistants</b><br>{% for a in groups.R %}{{ a.antibiotic }}{% if a.diameter %} ({{ a.diameter }} mm){% endif %}<br>{% else %}—{% endfor %}</div></div></section>{% endif %}
   <section class="report-block conclusion compact"><h2>Conclusion</h2><p>{{ result.conclusion or '—' }}</p></section>
-  <footer class="report-footer-clean"><div>Compte rendu validé électroniquement.</div><div class="signature-box">Validation laboratoire<br>{{ result.electronic_signature or '' }}</div></footer>
+  <footer class="report-footer-clean"><div>Compte rendu validé électroniquement.</div><div class="signature-box"><b>Validé par :</b><br>{{ validator.name if validator else '—' }}<br>{{ result.electronic_signature or '' }}</div></footer>
 </div>{% endblock %}

@@ -1,25 +1,18 @@
-PATCH PROFESSIONNEL ECBU LIAISON PRO V2
+PATCH PROFESSIONNEL - SUPPRESSION CHEF LABORATOIRE + PARAMETRES BON LABORATOIRE
 
 Corrections incluses :
-1. Formulaire prescripteur enrichi : sonde, antibiothérapie, hospitalisation, hôpital, service, commune, diagnostic, date de prélèvement.
-2. Questionnaire de conformité séparé côté réception laboratoire : patient informé, toilette intime, flacon, volume, délai, température, transport, nature du prélèvement.
-3. Décision automatique conformité / non-conformité à la réception.
-4. Bon de résultat A4 sur une seule page, sans nom de l'application et sans date de réception.
-5. Nom du laboratoire saisissable par le laboratoire et affiché sur le bon.
-6. Germe isolé affiché uniquement si culture positive.
-7. Antibiogramme affiché uniquement si culture positive.
-8. Prélèvement rejeté : pas de bon, notification au prescripteur avec motif.
-9. Export laboratoire CSV enrichi.
-10. Messagerie interne sécurisée avec assistant de suivi par numéro de demande.
-11. Responsable qualité supprimé des choix de rôles ; qualité rattachée au laboratoire/chef laboratoire.
-
-IMPORTANT : ce patch ne contient ni .github, ni __pycache__, ni logs.
+1. Suppression du rôle chef_labo : seuls les comptes laboratoire et prescripteur restent disponibles pour les utilisateurs, plus admin système.
+2. Les activités de validation finale reviennent au compte laboratoire.
+3. Première connexion laboratoire : configuration obligatoire des paramètres permanents du bon (nom de l’hôpital, nom du laboratoire, titre/signature de validation).
+4. Traçabilité analytique : le résultat conserve le nom de l’utilisateur laboratoire qui a manipulé/saisi l’échantillon.
+5. Bon de résultat : seul le nom du validateur apparaît sur le compte rendu, avec signature électronique si renseignée.
+6. Design du bon renforcé en format A4 strict, commun à tous les laboratoires.
+7. Aucun dossier .github, aucun __pycache__, aucun log inclus.
 
 Après remplacement des fichiers :
 python -m compileall app run.py config.py extensions.py
-git rm --cached -r .github __pycache__ app/__pycache__ logs 2>$null
 git add .
-git commit -m "Ameliore demande conformite bon export et messagerie"
+git commit -m "Supprime chef labo et ajoute profil laboratoire"
 git push
 
-Sur Render, utilisez PostgreSQL via DATABASE_URL pour conserver les comptes et données après redémarrage.
+Sur Render : vérifier que DATABASE_URL pointe vers PostgreSQL, pas SQLite, pour conserver les données après redémarrage.

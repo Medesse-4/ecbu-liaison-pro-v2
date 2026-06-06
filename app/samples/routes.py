@@ -15,14 +15,14 @@ QUALITY_FIELDS = [
 
 @bp.route("/")
 @login_required
-@role_required("laboratoire", "chef_labo")
+@role_required("laboratoire")
 def index():
     samples = Sample.query.order_by(Sample.id.desc()).limit(200).all()
     return render_template("samples/index.html", samples=samples)
 
 @bp.route("/new/<int:request_id>", methods=["GET", "POST"])
 @login_required
-@role_required("laboratoire", "chef_labo")
+@role_required("laboratoire")
 def create(request_id):
     req = db.session.get(EcbuRequest, request_id)
     if not req:

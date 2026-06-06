@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 from sqlalchemy import text
 from config import Config, ProductionConfig
 from extensions import db, migrate, csrf, login_manager, limiter, mail, swagger
@@ -38,6 +38,21 @@ def create_app(config_object=None):
 
     register_blueprints(app)
     register_errors(app)
+
+    @app.before_request
+    def require_laboratory_profile():
+        from flask_login import current_user
+        if not getattr(current_user, "is_authenticated", False):
+            return None
+        if getattr(current_user, "role", None) != "laboratoire":
+            return None
+        allowed = {"results.lab_profile", "auth.logout", "static"}
+        if request.endpoint in allowed or (request.endpoint or "").startswith("static"):
+            return None
+        from app.models import LabProfile
+        if LabProfile.query.filter_by(user_id=current_user.id).first() is None:
+            return redirect(url_for("results.lab_profile"))
+        return None
 
     with app.app_context():
         db.create_all()
@@ -125,6 +140,9 @@ def ensure_runtime_schema(app):
         },
         "lab_results": {
             "laboratory_name": "VARCHAR(180)",
+            "hospital_name_on_report": "VARCHAR(180)",
+            "manipulated_by_id": "INTEGER",
+            "manipulated_by_name": "VARCHAR(160)",
             "isolated_germ": "VARCHAR(180)",
             "rejection_reason": "TEXT",
             "deleted_at": "DATETIME",

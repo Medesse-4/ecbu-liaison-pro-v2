@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SelectField, TextAreaField, BooleanField, DateField, TimeField, SubmitField
 from wtforms.validators import DataRequired, Email, Length, Optional, EqualTo
 
-ROLES = [("prescripteur", "Prescripteur"), ("laboratoire", "Laboratoire"), ("chef_labo", "Chef laboratoire")]
+ROLES = [("prescripteur", "Prescripteur"), ("laboratoire", "Laboratoire"), ("Laboratoire")]
 
 YES_NO = [("non", "Non"), ("oui", "Oui"), ("non_renseigne", "Non renseigné")]
 
@@ -19,6 +19,14 @@ class RegisterForm(FlaskForm):
     role = SelectField("Profil", choices=ROLES, validators=[DataRequired()])
     service = StringField("Service", validators=[DataRequired(), Length(max=160)])
     submit = SubmitField("Créer le compte")
+
+
+class LabProfileForm(FlaskForm):
+    hospital_name = StringField("Nom de l’hôpital", validators=[DataRequired(), Length(max=180)])
+    laboratory_name = StringField("Nom du laboratoire", validators=[DataRequired(), Length(max=180)])
+    validator_title = StringField("Titre du validateur", validators=[Optional(), Length(max=120)])
+    signature_text = StringField("Signature électronique à afficher", validators=[Optional(), Length(max=160)])
+    submit = SubmitField("Enregistrer les paramètres du bon")
 
 class RequestForm(FlaskForm):
     sampling_code = StringField("Code prélèvement", validators=[Optional(), Length(max=80)])

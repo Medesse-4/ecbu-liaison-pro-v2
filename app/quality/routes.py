@@ -9,7 +9,7 @@ bp = Blueprint("quality", __name__, url_prefix="/quality")
 
 @bp.route("/non-conformities", methods=["GET", "POST"])
 @login_required
-@role_required("responsable_qualite", "laboratoire", "chef_labo")
+@role_required("laboratoire")
 def non_conformities():
     form = NonConformityForm()
     req_id = request.args.get("request_id", type=int)
@@ -22,7 +22,7 @@ def non_conformities():
                 req.conformity = "non_compliant"
         db.session.commit()
         audit("declaration_non_conformite", "non_conformity", nc.id)
-        notify("Non-conformité déclarée", nc.type_nc, role_target="responsable_qualite", level="danger")
+        notify("Non-conformité déclarée", nc.type_nc, role_target="laboratoire", level="danger")
         flash("Non-conformité déclarée.", "success")
         return redirect(url_for("quality.non_conformities"))
     rows = NonConformity.query.order_by(NonConformity.id.desc()).limit(300).all()
@@ -30,7 +30,7 @@ def non_conformities():
 
 @bp.route("/capa")
 @login_required
-@role_required("responsable_qualite", "laboratoire", "chef_labo")
+@role_required("laboratoire")
 def capa():
     actions = CapaAction.query.order_by(CapaAction.id.desc()).limit(200).all()
     return render_template("quality/capa.html", actions=actions)

@@ -26,10 +26,11 @@
           <li class="nav-item"><a class="nav-link" href="{{ url_for('results.index') }}">Mes résultats</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('tickets.index') }}">Support</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('chat.index') }}">Messagerie</a></li>
-        {% elif current_user.role in ['laboratoire','chef_labo'] %}
+        {% elif current_user.role == 'laboratoire' %}
           <li class="nav-item"><a class="nav-link" href="{{ url_for('requests.index') }}">Demandes reçues</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('samples.index') }}">Échantillons</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('results.index') }}">Résultats</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('results.lab_profile') }}">Paramètres du bon</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('antibiograms.index') }}">Antibiorésistance</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('statistics.index') }}">Statistiques labo</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('quality.non_conformities') }}">Qualité</a></li>

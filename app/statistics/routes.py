@@ -8,7 +8,7 @@ bp = Blueprint("statistics", __name__, url_prefix="/statistics")
 
 @bp.route("/")
 @login_required
-@role_required("laboratoire", "chef_labo")
+@role_required("laboratoire")
 def index():
     total = EcbuRequest.query.count()
     validated = EcbuRequest.query.filter_by(status="validated").count()
@@ -18,7 +18,7 @@ def index():
 
 @bp.route("/api/overview")
 @login_required
-@role_required("laboratoire", "chef_labo")
+@role_required("laboratoire")
 def overview():
     by_nc = NonConformity.query.with_entities(NonConformity.type_nc, func.count(NonConformity.id)).group_by(NonConformity.type_nc).all()
     resistance = Antibiogram.query.with_entities(Antibiogram.interpretation, func.count(Antibiogram.id)).group_by(Antibiogram.interpretation).all()

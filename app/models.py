@@ -36,6 +36,18 @@ class User(UserMixin, TimestampMixin, db.Model):
     deletion_confirmed_by_id = db.Column(db.Integer)
     deletion_confirmed_at = db.Column(db.DateTime(timezone=True))
 
+
+class LabProfile(TimestampMixin, db.Model):
+    __tablename__ = "lab_profiles"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True, index=True)
+    user = db.relationship("User", backref=db.backref("lab_profile", uselist=False))
+    hospital_name = db.Column(db.String(180), nullable=False)
+    laboratory_name = db.Column(db.String(180), nullable=False)
+    validator_title = db.Column(db.String(120))
+    signature_text = db.Column(db.String(160))
+
+
 class EcbuRequest(TimestampMixin, db.Model):
     __tablename__ = "ecbu_requests"
     id = db.Column(db.Integer, primary_key=True)
@@ -115,6 +127,9 @@ class LabResult(TimestampMixin, db.Model):
     request_id = db.Column(db.Integer, db.ForeignKey("ecbu_requests.id"), nullable=False, unique=True)
     request = db.relationship("EcbuRequest", backref="result", uselist=False)
     laboratory_name = db.Column(db.String(180))
+    hospital_name_on_report = db.Column(db.String(180))
+    manipulated_by_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    manipulated_by_name = db.Column(db.String(160))
     isolated_germ = db.Column(db.String(180))
     rejection_reason = db.Column(db.Text)
     aspect = db.Column(db.String(160))
@@ -127,6 +142,7 @@ class LabResult(TimestampMixin, db.Model):
     culture_details = db.Column(db.Text)
     conclusion = db.Column(db.Text)
     validated_by_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    validated_by = db.relationship("User", foreign_keys=[validated_by_id])
     validated_at = db.Column(db.DateTime(timezone=True))
     electronic_signature = db.Column(db.String(160))
     deleted_at = db.Column(db.DateTime(timezone=True))
