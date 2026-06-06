@@ -1,0 +1,29 @@
+{% extends 'base.html' %}{% block content %}
+<div class="no-print text-center mb-3"><button class="btn btn-primary btn-lg" onclick="print()">Imprimer / Enregistrer en PDF</button></div>
+<div class="report-sheet professional-report">
+  <div class="report-head">
+    <div class="report-title">LABORATOIRE DE BIOLOGIE MÉDICALE</div>
+    <div class="fw-bold">ECBU Liaison Pro V2</div>
+    <div class="report-subtitle">Compte rendu d’examen cytobactériologique des urines</div>
+    <div class="small text-muted">Document validé électroniquement · Traçabilité ISO 15189</div>
+  </div>
+  <div class="report-grid patient-block">
+    <div><b>Patient :</b> {{ req.patient_name }} {{ req.patient_firstname or '' }}</div>
+    <div><b>N° demande :</b> {{ req.request_number }}</div>
+    <div><b>Sexe / Âge :</b> {{ req.patient_sex }} / {{ req.patient_age }} {{ req.patient_age_unit }}</div>
+    <div><b>N° échantillon :</b> {{ req.samples[0].sample_number if req.samples else '—' }}</div>
+    <div><b>Service demandeur :</b> {{ req.requesting_service }}</div>
+    <div><b>Prescripteur :</b> {{ req.prescriber_name }}</div>
+    <div><b>Nature du prélèvement :</b> Urines</div>
+    <div><b>Statut :</b> Résultat validé</div>
+  </div>
+  <div class="report-section"><h3>Renseignements cliniques</h3><div class="body">{{ req.clinical_context or '—' }}</div></div>
+  <div class="report-section"><h3>Examen macroscopique</h3><div class="body"><b>Aspect :</b> {{ result.aspect or '—' }}</div></div>
+  <div class="report-section"><h3>Examen microscopique</h3><div class="body report-grid"><div><b>Leucocytes :</b> {{ result.leukocytes or '—' }}</div><div><b>Hématies :</b> {{ result.red_cells or '—' }}</div><div><b>Cellules épithéliales :</b> {{ result.epithelial_cells or '—' }}</div><div><b>Autres éléments :</b> {{ result.other_elements or '—' }}</div></div></div>
+  <div class="report-section"><h3>Coloration de Gram</h3><div class="body">{{ result.gram_stain or '—' }}</div></div>
+  <div class="report-section"><h3>Culture</h3><div class="body"><b>Statut :</b> {{ result.culture_status or '—' }}<br><b>Détails / germe isolé :</b><br>{{ result.culture_details or '—' }}</div></div>
+  <div class="report-section"><h3>Antibiogramme EUCAST</h3><div class="body">{% if result.culture_status == 'positive' %}<div class="atb-grid"><div class="atb-box sensitive"><b>Sensibles</b><hr>{% for a in groups.S %}{{ a.antibiotic }}{% if a.diameter %} ({{ a.diameter }} mm){% endif %}<br>{% else %}—{% endfor %}</div><div class="atb-box intermediate"><b>Intermédiaires</b><hr>{% for a in groups.I %}{{ a.antibiotic }}{% if a.diameter %} ({{ a.diameter }} mm){% endif %}<br>{% else %}—{% endfor %}</div><div class="atb-box resistant"><b>Résistants</b><hr>{% for a in groups.R %}{{ a.antibiotic }}{% if a.diameter %} ({{ a.diameter }} mm){% endif %}<br>{% else %}—{% endfor %}</div></div><div class="small text-muted mt-2">S = sensible ; I = sensible à exposition augmentée ; R = résistant. Interprétation selon référentiel EUCAST utilisé par le laboratoire.</div>{% else %}<div class="text-muted fw-bold">Antibiogramme non applicable.</div>{% endif %}</div></div>
+  <div class="report-section"><h3>Conclusion biologique</h3><div class="body conclusion-box">{{ result.conclusion or '—' }}</div></div>
+  <div class="validation-footer"><div><b>Signature électronique :</b><br>{{ result.electronic_signature or '—' }}<br><span class="small text-muted">Toute modification ou suppression ultérieure est tracée dans l’audit.</span></div><div class="signature"><span class="line"><b>Validation laboratoire</b><br>{{ result.validated_at or 'En attente' }}<br>Document généré par ECBU Liaison Pro V2</span></div></div>
+</div>
+{% endblock %}

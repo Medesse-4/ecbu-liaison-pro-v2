@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<h1>CAPA</h1><table class="table"><tr><th>Action corrective</th><th>Action préventive</th><th>Responsable</th><th>Statut</th></tr>{% for a in actions %}<tr><td>{{ a.corrective_action }}</td><td>{{ a.preventive_action }}</td><td>{{ a.responsible }}</td><td>{{ a.status }}</td></tr>{% endfor %}</table>{% endblock %}
