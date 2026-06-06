@@ -60,9 +60,10 @@ def register_blueprints(app):
     from app.antibiograms.routes import bp as antibiograms_bp
     from app.tickets.routes import bp as tickets_bp
     from app.notifications.routes import bp as notifications_bp
+    from app.chat.routes import bp as chat_bp
     from app.audit.routes import bp as audit_bp
     from app.api.routes import bp as api_bp
-    for bp in [auth_bp, dashboard_bp, admin_bp, requests_bp, samples_bp, results_bp, quality_bp, statistics_bp, antibiograms_bp, tickets_bp, notifications_bp, audit_bp, api_bp]:
+    for bp in [auth_bp, dashboard_bp, admin_bp, requests_bp, samples_bp, results_bp, quality_bp, statistics_bp, antibiograms_bp, tickets_bp, notifications_bp, chat_bp, audit_bp, api_bp]:
         app.register_blueprint(bp)
 
 
@@ -79,11 +80,13 @@ def register_errors(app):
 
 def register_security_headers(app):
     @app.after_request
-    def add_security_headers(response):
+    def add_headers(response):
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
-        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
         response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
-        response.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+        response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+        if app.config.get("SESSION_COOKIE_SECURE"):
+            response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         return response
 
 
@@ -100,69 +103,67 @@ def seed_admin(app):
 
 
 def ensure_runtime_schema(app):
-    """Ajoute les colonnes non destructives nécessaires aux bases déjà créées."""
+    """Ajoute les colonnes non destructives nécessaires si une base locale existait déjà."""
     engine = db.engine
     inspector = db.inspect(engine)
-    tables = set(inspector.get_table_names())
-    dialect = engine.dialect.name
-
-    def ddl_type(kind):
-        if kind == "datetime":
-            return "TIMESTAMP WITH TIME ZONE" if dialect == "postgresql" else "DATETIME"
-        if kind == "date":
-            return "DATE"
-        if kind == "bool":
-            return "BOOLEAN" if dialect == "postgresql" else "BOOLEAN"
-        if kind == "int":
-            return "INTEGER"
-        if kind.startswith("str"):
-            size = kind.split(":", 1)[1]
-            return f"VARCHAR({size})"
-        return "TEXT"
+    if "users" not in inspector.get_table_names():
+        return
+    cols = {c["name"] for c in inspector.get_columns("users")}
+    additions = {
+        "deletion_requested_at": "DATETIME",
+        "deletion_reason": "TEXT",
+        "deletion_confirmed_by_id": "INTEGER",
+        "deletion_confirmed_at": "DATETIME",
+    }
+    with engine.begin() as conn:
+        for col, ddl in additions.items():
+            if col not in cols:
+                conn.execute(text(f"ALTER TABLE users ADD COLUMN {col} {ddl}"))
 
     table_additions = {
-        "users": {
-            "deletion_requested_at": "datetime",
-            "deletion_reason": "text",
-            "deletion_confirmed_by_id": "int",
-            "deletion_confirmed_at": "datetime",
-        },
         "ecbu_requests": {
-            "deleted_by_id": "int",
-            "delete_reason": "text",
-            "hospital_origin": "str:180",
-            "sample_nature": "str:120",
-            "postoperative_suppuration_details": "text",
-            "provenance_commune": "str:160",
-            "consultation_reason": "text",
-            "general_signs": "text",
-            "recent_hospitalization_before_admission": "str:40",
-            "recent_hospitalization_duration": "str:80",
-            "currently_hospitalized": "str:40",
-            "current_hospitalization_duration": "str:80",
-            "antibiotic_treatment": "str:80",
-            "current_atb_duration": "str:80",
-            "chronic_underlying_disease": "text",
-            "main_diagnosis": "text",
-            "sampling_date": "date",
-            "previous_episode_6_months": "str:40",
-            "current_episode": "str:40",
+            "deleted_by_id": "INTEGER",
+            "delete_reason": "TEXT",
+            "hospital_origin": "VARCHAR(180)",
+            "origin_commune": "VARCHAR(160)",
+            "sample_nature": "VARCHAR(120)",
+            "patient_under_catheter": "BOOLEAN DEFAULT 0",
+            "consultation_reason": "TEXT",
+            "general_signs": "TEXT",
+            "recent_hospitalization_before_admission": "VARCHAR(30)",
+            "recent_hospitalization_duration": "VARCHAR(80)",
+            "currently_hospitalized": "VARCHAR(30)",
+            "current_hospitalization_duration": "VARCHAR(80)",
+            "antibiotic_treatment": "VARCHAR(80)",
+            "current_atb_duration": "VARCHAR(80)",
+            "chronic_disease": "TEXT",
+            "primary_diagnosis": "TEXT",
+            "sampling_date": "DATE",
         },
         "samples": {
-            "conformity_decision": "str:40",
-            "conformity_comment": "text",
+            "preanalytical_decision": "VARCHAR(40)",
+            "preanalytical_comment": "TEXT",
+        },
+        "quality_checklists": {
+            "collection_instructions_given": "BOOLEAN DEFAULT 0",
+            "request_form_complete": "BOOLEAN DEFAULT 0",
+            "patient_identity_match": "BOOLEAN DEFAULT 0",
+            "acceptable_container": "BOOLEAN DEFAULT 0",
         },
         "lab_results": {
-            "deleted_at": "datetime",
-            "deleted_by_id": "int",
-            "delete_reason": "text",
+            "deleted_at": "DATETIME",
+            "deleted_by_id": "INTEGER",
+            "delete_reason": "TEXT",
+            "lab_name": "VARCHAR(180)",
+            "rejection_reason": "TEXT",
         },
     }
+    tables = set(inspector.get_table_names())
     with engine.begin() as conn:
         for table, wanted in table_additions.items():
             if table not in tables:
                 continue
             existing = {c["name"] for c in inspector.get_columns(table)}
-            for col, kind in wanted.items():
+            for col, ddl in wanted.items():
                 if col not in existing:
-                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {ddl_type(kind)}"))
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {ddl}"))

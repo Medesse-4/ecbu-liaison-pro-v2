@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="hero-card mb-4"><div><div class="eyebrow">Communication sécurisée</div><h1 class="page-title mb-1">Messagerie interne</h1><p class="text-muted mb-0">Les échanges sont limités aux destinataires autorisés. Le suivi automatique utilise le numéro de demande.</p></div></div>
+<div class="row g-4">
+  <div class="col-lg-5"><div class="card card-body"><h2 class="section-heading">Nouvelle discussion</h2><form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if current_user.role != 'admin' %}<label class="form-label">N° demande</label><input name="request_number" class="form-control mb-3" placeholder="DEM-2026-000001">{% endif %}
+    {% if current_user.role == 'admin' %}<input type="hidden" name="admin_thread" value="1">{% endif %}
+    <label class="form-label">Objet</label><input name="subject" class="form-control mb-3" placeholder="Objet de la discussion">
+    <label class="form-label">Message</label><textarea name="body" class="form-control mb-3" rows="4"></textarea>
+    <button class="btn btn-primary">Créer</button>
+  </form></div></div>
+  <div class="col-lg-7"><div class="card card-body"><h2 class="section-heading">Discussions</h2>
+    {% for t in threads %}<a class="thread-row" href="{{ url_for('chat.thread', thread_id=t.id) }}"><div><b>{{ t.subject }}</b><div class="text-muted small">{{ t.request.request_number if t.request else 'Discussion administrative' }}</div></div><span class="badge text-bg-light">{{ t.messages|length }} messages</span></a>{% else %}<p class="text-muted">Aucune discussion.</p>{% endfor %}
+  </div></div>
+</div>
+{% endblock %}

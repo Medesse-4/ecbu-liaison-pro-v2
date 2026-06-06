@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, Response
 from flask_login import login_required, current_user
 from extensions import db
 from app.forms import ResultForm
-from app.models import EcbuRequest, LabResult, Sample
+from app.models import EcbuRequest, LabResult, Sample, QualityChecklist
 from app.utils import audit, notify, utcnow, role_required, clinical_access_for_request
 import io, csv
 
@@ -38,10 +38,20 @@ def edit(request_id):
         result.deleted_at = None
         if result.id is None:
             db.session.add(result)
-        req.status = "pending_validation"
+        if result.culture_status == "rejected":
+            req.status = "rejected"
+            reason = result.rejection_reason or result.conclusion or "Motif non renseigné"
+            notify(
+                "Prélèvement rejeté",
+                f"Le prélèvement de la demande {req.request_number} est rejeté pour raison : {reason}",
+                user_id=req.created_by_id,
+                level="warning",
+            )
+        else:
+            req.status = "pending_validation"
+            notify("Résultat à valider", req.request_number, role_target="chef_labo", level="warning")
         db.session.commit()
         audit("saisie_resultat", "lab_result", result.id, old, {"status": req.status, "conclusion": result.conclusion})
-        notify("Résultat à valider", req.request_number, role_target="chef_labo", level="warning")
         flash("Résultat enregistré.", "success")
         return redirect(url_for("results.index"))
     return render_template("results/form.html", form=form, req=req)
@@ -94,6 +104,8 @@ def report(result_id):
         return render_template("errors/403.html"), 403
     if current_user.role == "prescripteur" and result.request.status != "validated":
         return render_template("errors/403.html"), 403
+    if current_user.role == "prescripteur" and result.culture_status == "rejected":
+        return render_template("errors/403.html"), 403
     groups = {"S": [], "I": [], "R": []}
     for row in result.antibiograms:
         if row.display_on_report and row.interpretation in groups:
@@ -109,3 +121,32 @@ def export_csv():
     for r in LabResult.query.filter(LabResult.deleted_at.is_(None)).order_by(LabResult.id.desc()).all():
         w.writerow([r.request.request_number, r.culture_status, r.conclusion, r.validated_at])
     return Response(out.getvalue().encode('utf-8-sig'), mimetype='text/csv', headers={'Content-Disposition':'attachment; filename=resultats_ecbu.csv'})
+
+
+@bp.route("/export/laboratory-database.csv")
+@login_required
+@role_required("laboratoire", "chef_labo")
+def export_laboratory_database():
+    out = io.StringIO()
+    w = csv.writer(out, delimiter=';')
+    w.writerow([
+        "N° demande", "N° échantillon", "Patient", "Sexe", "Âge", "Hôpital", "Service", "Commune",
+        "Nature prélèvement", "Patient sous sonde", "Traitement ATB", "Durée ATB", "Hospitalisé",
+        "Motif consultation", "Diagnostic principal", "Conformité", "Décision préanalytique",
+        "Culture", "Germe isolé", "Conclusion", "Date création"
+    ])
+    requests = EcbuRequest.query.filter(EcbuRequest.deleted_at.is_(None)).order_by(EcbuRequest.id.desc()).all()
+    for req in requests:
+        sample = req.samples[0] if req.samples else None
+        result = req.result[0] if isinstance(req.result, list) and req.result else getattr(req, 'result', None)
+        if isinstance(result, list):
+            result = result[0] if result else None
+        germ = result.culture_details if result and result.culture_status == "positive" else ""
+        w.writerow([
+            req.request_number, sample.sample_number if sample else "", f"{req.patient_name} {req.patient_firstname or ''}",
+            req.patient_sex, f"{req.patient_age or ''} {req.patient_age_unit or ''}", req.hospital_origin, req.requesting_service, req.origin_commune,
+            req.sample_nature, "Oui" if req.patient_under_catheter else "Non", req.antibiotic_treatment, req.current_atb_duration, req.currently_hospitalized,
+            req.consultation_reason, req.primary_diagnosis, req.conformity, sample.preanalytical_decision if sample else "",
+            result.culture_status if result else "", germ, result.conclusion if result else "", req.created_at
+        ])
+    return Response(out.getvalue().encode('utf-8-sig'), mimetype='text/csv', headers={'Content-Disposition':'attachment; filename=base_laboratoire_ecbu.csv'})

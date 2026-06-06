@@ -3,24 +3,37 @@
 <div class="hero-card mb-4">
   <div>
     <div class="eyebrow">Réception laboratoire</div>
-    <h1 class="page-title mb-1">Contrôle de l’échantillon — {{ req.request_number }}</h1>
-    <p class="mb-0 text-muted">L’évaluation de conformité est calculée automatiquement à partir des critères cochés.</p>
+    <h1 class="page-title mb-1">Contrôle de conformité du prélèvement</h1>
+    <p class="text-muted mb-0">Demande {{ req.request_number }} — {{ req.patient_name }} {{ req.patient_firstname or '' }}</p>
   </div>
 </div>
-<form method="post" class="card card-body row g-3 sample-form">
-  {{ form.hidden_tag() }}
-  <h5 class="form-section-title">Identification de l’échantillon</h5>
-  {% for name in ['sample_number','sample_type','sampling_date','sampling_time','reception_date','reception_time','transport_condition','storage_temperature'] %}
-    {% set f = form[name] %}<div class="col-md-3">{{ f.label(class='form-label') }}{{ f(class='form-control') }}</div>
-  {% endfor %}
-  <h5 class="form-section-title mt-4">Conformité pré-analytique</h5>
-  <div class="col-12"><div class="quality-grid">
-    {% for field,label in quality_fields %}
-      {% set f = form[field] %}
-      <label class="quality-check">{{ f(class='form-check-input') }} <span>{{ label }}</span></label>
-    {% endfor %}
-  </div></div>
-  <div class="col-12">{{ form.conformity_comment.label(class='form-label') }}{{ form.conformity_comment(class='form-control', rows='3') }}</div>
-  <div class="col-12"><button class="btn btn-primary btn-lg">Enregistrer la réception</button></div>
+<form method="post" class="clinical-form">{{ form.hidden_tag() }}
+  <div class="card card-body mb-4">
+    <h2 class="section-heading">Réception de l’échantillon</h2>
+    <div class="row g-3">
+      <div class="col-md-4">{{ form.sample_number.label(class='form-label') }}{{ form.sample_number(class='form-control') }}</div>
+      <div class="col-md-4">{{ form.sample_type.label(class='form-label') }}{{ form.sample_type(class='form-select') }}</div>
+      <div class="col-md-2">{{ form.sampling_date.label(class='form-label') }}{{ form.sampling_date(class='form-control') }}</div>
+      <div class="col-md-2">{{ form.sampling_time.label(class='form-label') }}{{ form.sampling_time(class='form-control') }}</div>
+      <div class="col-md-2">{{ form.reception_date.label(class='form-label') }}{{ form.reception_date(class='form-control') }}</div>
+      <div class="col-md-2">{{ form.reception_time.label(class='form-label') }}{{ form.reception_time(class='form-control') }}</div>
+      <div class="col-md-4">{{ form.transport_condition.label(class='form-label') }}{{ form.transport_condition(class='form-control') }}</div>
+      <div class="col-md-4">{{ form.storage_temperature.label(class='form-label') }}{{ form.storage_temperature(class='form-control') }}</div>
+    </div>
+  </div>
+  <div class="card card-body mb-4 conformity-panel">
+    <h2 class="section-heading">Questionnaire pré-analytique</h2>
+    <p class="text-muted">La décision de conformité est calculée automatiquement : tous les critères doivent être cochés pour que le prélèvement soit conforme.</p>
+    <div class="row g-3 checklist-grid">
+      {% for field in [form.patient_informed, form.technique_mastered, form.intimate_toilet, form.sterile_container, form.identified_container, form.sufficient_volume, form.no_leakage, form.delay_compliant, form.temperature_compliant, form.transport_compliant, form.sample_nature_compliant, form.collection_instructions_given, form.request_form_complete, form.patient_identity_match, form.acceptable_container] %}
+        <div class="col-md-4"><div class="form-check premium-check h-100">{{ field(class='form-check-input') }}{{ field.label(class='form-check-label') }}</div></div>
+      {% endfor %}
+    </div>
+    <div class="mt-3">{{ form.preanalytical_comment.label(class='form-label') }}{{ form.preanalytical_comment(class='form-control', rows='3') }}</div>
+  </div>
+  <div class="d-flex justify-content-end gap-2 mb-5">
+    <a href="{{ url_for('requests.index') }}" class="btn btn-outline-secondary btn-lg">Annuler</a>
+    {{ form.submit(class='btn btn-primary btn-lg') }}
+  </div>
 </form>
 {% endblock %}

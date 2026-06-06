@@ -20,12 +20,8 @@ class Config:
     WTF_CSRF_TIME_LIMIT = None
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Strict"
-    SESSION_COOKIE_SECURE = os.environ.get("SECURE_COOKIES", "true").lower() == "true"
-    REMEMBER_COOKIE_HTTPONLY = True
-    REMEMBER_COOKIE_SECURE = SESSION_COOKIE_SECURE
-    REMEMBER_COOKIE_SAMESITE = "Strict"
+    SESSION_COOKIE_SECURE = os.environ.get("SECURE_COOKIES", "false").lower() == "true"
     PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
-    RATELIMIT_STORAGE_URI = os.environ.get("REDIS_URL") or "memory://"
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024
     MAIL_SERVER = os.environ.get("MAIL_SERVER")
     MAIL_PORT = int(os.environ.get("MAIL_PORT", "587"))
@@ -34,7 +30,8 @@ class Config:
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", MAIL_USERNAME)
     APP_BASE_URL = os.environ.get("APP_BASE_URL", "http://127.0.0.1:5000")
-    REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+    REDIS_URL = os.environ.get("REDIS_URL", "")
+    RATELIMIT_STORAGE_URI = os.environ.get("REDIS_URL", "memory://")
     ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@hopital.cd")
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "ChangeMeStrongPassword123!")
 
@@ -44,3 +41,5 @@ class ProductionConfig(Config):
         missing = [k for k in ("SECRET_KEY", "DATABASE_URL", "ADMIN_EMAIL", "ADMIN_PASSWORD") if not os.environ.get(k)]
         if missing:
             raise RuntimeError("Variables d'environnement manquantes: " + ", ".join(missing))
+        if cls.SECRET_KEY in {"dev-only-change-me", "CHANGE_ME_LONG_RANDOM_SECRET"} or len(cls.SECRET_KEY) < 32:
+            raise RuntimeError("SECRET_KEY doit être longue, unique et strictement confidentielle.")

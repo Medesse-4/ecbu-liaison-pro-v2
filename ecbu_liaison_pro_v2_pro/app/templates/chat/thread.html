@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="hero-card mb-4"><div><div class="eyebrow">Fil sécurisé</div><h1 class="page-title mb-1">{{ thread.subject }}</h1><p class="text-muted mb-0">{{ thread.request.request_number if thread.request else 'Discussion administrative' }}</p></div></div>
+<div class="card card-body chat-panel mb-4">
+{% for m in thread.messages %}
+  <div class="chat-message {% if m.is_assistant %}assistant{% elif m.sender_id == current_user.id %}me{% else %}other{% endif %}">
+    <div class="chat-meta">{% if m.is_assistant %}Assistant de suivi{% else %}{{ m.sender_role }}{% endif %} — {{ m.created_at }}</div>
+    <div class="chat-body">{{ m.body|replace('
+','<br>')|safe }}</div>
+  </div>
+{% endfor %}
+</div>
+<form method="post" class="card card-body"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label class="form-label">Message</label><textarea name="body" class="form-control mb-3" rows="3" placeholder="Écrivez votre message. Pour obtenir l’avancement, mentionnez le numéro de demande ou demandez le statut."></textarea><button class="btn btn-primary">Envoyer</button></form>
+{% endblock %}

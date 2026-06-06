@@ -1,1 +1,22 @@
-{% extends 'base.html' %}{% block content %}<h1>Résultat — {{ req.request_number }}</h1><form method="post" class="card card-body row g-3">{{ form.hidden_tag() }}{% for f in form if f.name not in ['csrf_token','submit'] %}<div class="col-md-6">{{ f.label(class='form-label') }}{{ f(class='form-control') }}</div>{% endfor %}<div>{{ form.submit(class='btn btn-primary') }}</div></form>{% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<div class="hero-card mb-4"><div><div class="eyebrow">Analyse biologique</div><h1 class="page-title mb-1">Saisie du résultat ECBU</h1><p class="text-muted mb-0">Demande {{ req.request_number }} — {{ req.patient_name }} {{ req.patient_firstname or '' }}</p></div></div>
+<form method="post" class="clinical-form">{{ form.hidden_tag() }}
+  <div class="card card-body mb-4"><h2 class="section-heading">Identification du compte rendu</h2><div class="row g-3"><div class="col-md-6">{{ form.lab_name.label(class='form-label') }}{{ form.lab_name(class='form-control', placeholder='Ex. Laboratoire de biologie médicale') }}</div></div></div>
+  <div class="card card-body mb-4"><h2 class="section-heading">Examen macroscopique et microscopique</h2><div class="row g-3">
+    <div class="col-md-4">{{ form.aspect.label(class='form-label') }}{{ form.aspect(class='form-control') }}</div>
+    <div class="col-md-4">{{ form.leukocytes.label(class='form-label') }}{{ form.leukocytes(class='form-control') }}</div>
+    <div class="col-md-4">{{ form.red_cells.label(class='form-label') }}{{ form.red_cells(class='form-control') }}</div>
+    <div class="col-md-6">{{ form.epithelial_cells.label(class='form-label') }}{{ form.epithelial_cells(class='form-control') }}</div>
+    <div class="col-md-6">{{ form.other_elements.label(class='form-label') }}{{ form.other_elements(class='form-control', rows='2') }}</div>
+  </div></div>
+  <div class="card card-body mb-4"><h2 class="section-heading">Culture et conclusion</h2><div class="row g-3">
+    <div class="col-md-6">{{ form.gram_stain.label(class='form-label') }}{{ form.gram_stain(class='form-control', rows='3') }}</div>
+    <div class="col-md-3">{{ form.culture_status.label(class='form-label') }}{{ form.culture_status(class='form-select') }}</div>
+    <div class="col-md-3">{{ form.culture_details.label(class='form-label') }}{{ form.culture_details(class='form-control') }}</div>
+    <div class="col-md-6">{{ form.rejection_reason.label(class='form-label') }}{{ form.rejection_reason(class='form-control', rows='3') }}</div>
+    <div class="col-md-6">{{ form.conclusion.label(class='form-label') }}{{ form.conclusion(class='form-control', rows='3') }}</div>
+  </div><p class="small text-muted mt-2">Le germe isolé et l’antibiogramme s’affichent uniquement si la culture est positive. En cas de rejet, le prescripteur reçoit une notification avec le motif.</p></div>
+  <div class="d-flex justify-content-end gap-2 mb-5"><a href="{{ url_for('results.index') }}" class="btn btn-outline-secondary btn-lg">Annuler</a>{{ form.submit(class='btn btn-primary btn-lg') }}</div>
+</form>
+{% endblock %}

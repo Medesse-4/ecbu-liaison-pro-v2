@@ -48,25 +48,23 @@ class EcbuRequest(TimestampMixin, db.Model):
     patient_age_unit = db.Column(db.String(20))
     patient_sex = db.Column(db.String(20))
     patient_phone = db.Column(db.String(40))
-    hospital_origin = db.Column(db.String(180), index=True)
+    hospital_origin = db.Column(db.String(180))
+    origin_commune = db.Column(db.String(160))
     requesting_service = db.Column(db.String(160), index=True)
     prescriber_name = db.Column(db.String(160))
-    sample_nature = db.Column(db.String(120), default="Urines")
-    postoperative_suppuration_details = db.Column(db.Text)
-    provenance_commune = db.Column(db.String(160))
+    sample_nature = db.Column(db.String(120))
+    patient_under_catheter = db.Column(db.Boolean, default=False)
     consultation_reason = db.Column(db.Text)
     general_signs = db.Column(db.Text)
-    recent_hospitalization_before_admission = db.Column(db.String(40))
+    recent_hospitalization_before_admission = db.Column(db.String(30))
     recent_hospitalization_duration = db.Column(db.String(80))
-    currently_hospitalized = db.Column(db.String(40))
+    currently_hospitalized = db.Column(db.String(30))
     current_hospitalization_duration = db.Column(db.String(80))
     antibiotic_treatment = db.Column(db.String(80))
     current_atb_duration = db.Column(db.String(80))
-    chronic_underlying_disease = db.Column(db.Text)
-    main_diagnosis = db.Column(db.Text)
+    chronic_disease = db.Column(db.Text)
+    primary_diagnosis = db.Column(db.Text)
     sampling_date = db.Column(db.Date)
-    previous_episode_6_months = db.Column(db.String(40))
-    current_episode = db.Column(db.String(40))
     clinical_context = db.Column(db.Text)
     urgent = db.Column(db.Boolean, default=False)
     status = db.Column(db.String(60), default="submitted", index=True)
@@ -75,8 +73,6 @@ class EcbuRequest(TimestampMixin, db.Model):
     created_by = db.relationship("User")
     archived_at = db.Column(db.DateTime(timezone=True))
     deleted_at = db.Column(db.DateTime(timezone=True))
-    deleted_by_id = db.Column(db.Integer)
-    delete_reason = db.Column(db.Text)
 
 class Sample(TimestampMixin, db.Model):
     __tablename__ = "samples"
@@ -92,8 +88,8 @@ class Sample(TimestampMixin, db.Model):
     reception_time = db.Column(db.Time)
     transport_condition = db.Column(db.String(160))
     storage_temperature = db.Column(db.String(80))
-    conformity_decision = db.Column(db.String(40), default="not_evaluated", index=True)
-    conformity_comment = db.Column(db.Text)
+    preanalytical_decision = db.Column(db.String(40), default="not_evaluated", index=True)
+    preanalytical_comment = db.Column(db.Text)
     status = db.Column(db.String(60), default="received", index=True)
     archived_at = db.Column(db.DateTime(timezone=True))
 
@@ -113,6 +109,10 @@ class QualityChecklist(TimestampMixin, db.Model):
     temperature_compliant = db.Column(db.Boolean, default=False)
     transport_compliant = db.Column(db.Boolean, default=False)
     sample_nature_compliant = db.Column(db.Boolean, default=False)
+    collection_instructions_given = db.Column(db.Boolean, default=False)
+    request_form_complete = db.Column(db.Boolean, default=False)
+    patient_identity_match = db.Column(db.Boolean, default=False)
+    acceptable_container = db.Column(db.Boolean, default=False)
     decision = db.Column(db.String(40), default="not_evaluated")
 
 class LabResult(TimestampMixin, db.Model):
@@ -128,6 +128,8 @@ class LabResult(TimestampMixin, db.Model):
     gram_stain = db.Column(db.Text)
     culture_status = db.Column(db.String(80))
     culture_details = db.Column(db.Text)
+    lab_name = db.Column(db.String(180))
+    rejection_reason = db.Column(db.Text)
     conclusion = db.Column(db.Text)
     validated_by_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     validated_at = db.Column(db.DateTime(timezone=True))
@@ -207,3 +209,29 @@ class AuditLog(db.Model):
     new_value = db.Column(db.Text)
     ip_address = db.Column(db.String(80))
     hash_chain = db.Column(db.String(128), nullable=False)
+
+
+class CommunicationThread(TimestampMixin, db.Model):
+    __tablename__ = "communication_threads"
+    id = db.Column(db.Integer, primary_key=True)
+    request_id = db.Column(db.Integer, db.ForeignKey("ecbu_requests.id"), index=True)
+    request = db.relationship("EcbuRequest", backref="communication_threads")
+    subject = db.Column(db.String(180), nullable=False)
+    prescriber_id = db.Column(db.Integer, db.ForeignKey("users.id"), index=True)
+    laboratory_role = db.Column(db.String(40), default="laboratoire", index=True)
+    admin_thread = db.Column(db.Boolean, default=False, nullable=False)
+    created_by_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    closed_at = db.Column(db.DateTime(timezone=True))
+
+
+class CommunicationMessage(TimestampMixin, db.Model):
+    __tablename__ = "communication_messages"
+    id = db.Column(db.Integer, primary_key=True)
+    thread_id = db.Column(db.Integer, db.ForeignKey("communication_threads.id"), nullable=False, index=True)
+    thread = db.relationship("CommunicationThread", backref="messages")
+    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    sender_role = db.Column(db.String(40), index=True)
+    body = db.Column(db.Text, nullable=False)
+    is_assistant = db.Column(db.Boolean, default=False, nullable=False)
+    visible_to_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), index=True)
+    visible_to_role = db.Column(db.String(40), index=True)

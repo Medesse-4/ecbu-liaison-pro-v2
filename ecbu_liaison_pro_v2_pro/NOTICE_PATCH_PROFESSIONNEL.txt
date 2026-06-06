@@ -1,0 +1,21 @@
+PATCH PROFESSIONNEL ECBU LIAISON PRO V2
+
+Corrections incluses :
+- Formulaire prescripteur clarifié et enrichi sans mélanger avec la réception laboratoire.
+- Contrôle de conformité à la réception séparé, avec calcul automatique conforme/non conforme.
+- Bon de résultat A4 une page, sans nom de l’application, sans date de réception, avec nom du laboratoire paramétrable par le laboratoire.
+- Germe isolé affiché uniquement en culture positive.
+- Antibiogramme affiché uniquement en culture positive.
+- En cas de rejet : notification au prescripteur avec motif, sans bon biologique.
+- Export CSV complet de la base laboratoire.
+- Messagerie interne sécurisée avec assistant de suivi par numéro de demande.
+- Aucun dossier .github ajouté.
+
+Mise à jour :
+1) Remplacer les fichiers du projet par ceux du patch.
+2) Exécuter : python -m compileall app run.py config.py extensions.py
+3) Exécuter : git add .
+4) Exécuter : git commit -m "Ameliore formulaire conformite bon export et messagerie"
+5) Exécuter : git push
+
+Production Render : utiliser obligatoirement PostgreSQL en DATABASE_URL pour conserver les comptes et les données après redémarrage.

@@ -34,12 +34,11 @@ ROLE_LABELS = {
     "prescripteur": "Prescripteur",
     "laboratoire": "Laboratoire",
     "chef_labo": "Chef laboratoire",
-    "responsable_qualite": "Responsable qualité",
 }
 
-CLINICAL_ROLES = {"prescripteur", "laboratoire", "chef_labo", "responsable_qualite"}
+CLINICAL_ROLES = {"prescripteur", "laboratoire", "chef_labo"}
 LAB_ROLES = {"laboratoire", "chef_labo"}
-QUALITY_ROLES = {"responsable_qualite", "laboratoire", "chef_labo"}
+QUALITY_ROLES = {"laboratoire", "chef_labo"}
 
 def has_role(*roles):
     return getattr(current_user, "is_authenticated", False) and getattr(current_user, "role", None) in roles
@@ -62,6 +61,6 @@ def clinical_access_for_request(req):
         return False
     if current_user.role == "prescripteur":
         return req.created_by_id == current_user.id
-    if current_user.role in {"laboratoire", "chef_labo", "responsable_qualite"}:
+    if current_user.role in {"laboratoire", "chef_labo"}:
         return True
     return False

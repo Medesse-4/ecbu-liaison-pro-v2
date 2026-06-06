@@ -24,7 +24,7 @@ def approve(user_id):
         user.is_active = True
         db.session.commit()
         audit("validation_compte", "user", user.id, old, {"active": True, "approved": True})
-        flash("Compte validé.", "success")
+        flash("Compte approuvé.", "success")
     return redirect(url_for("admin.users"))
 
 @bp.route("/users/<int:user_id>/toggle", methods=["POST"])

@@ -1,30 +1,36 @@
-{% extends 'base.html' %}{% block content %}
+{% extends 'base.html' %}
+{% block content %}
 <div class="no-print text-center mb-3"><button class="btn btn-primary btn-lg" onclick="print()">Imprimer / Enregistrer en PDF</button></div>
-<div class="report-sheet professional-report">
-  <div class="report-head clean-report-head">
-    <div class="report-title">LABORATOIRE DE BIOLOGIE MÉDICALE</div>
-    <div class="report-subtitle">EXAMEN CYTOBACTÉRIOLOGIQUE DES URINES</div>
-    <div class="small text-muted">Compte rendu de résultat biologique</div>
+<div class="report-sheet professional-report a4-one-page">
+  <div class="report-head">
+    <div class="report-title">{{ result.lab_name or 'LABORATOIRE DE BIOLOGIE MÉDICALE' }}</div>
+    <div class="report-subtitle">Compte rendu d’examen cytobactériologique des urines</div>
   </div>
-  <div class="report-grid patient-block">
+  <div class="report-grid patient-block compact-grid">
     <div><b>Patient :</b> {{ req.patient_name }} {{ req.patient_firstname or '' }}</div>
     <div><b>N° demande :</b> {{ req.request_number }}</div>
     <div><b>Sexe / Âge :</b> {{ req.patient_sex }} / {{ req.patient_age }} {{ req.patient_age_unit }}</div>
     <div><b>N° échantillon :</b> {{ req.samples[0].sample_number if req.samples else '—' }}</div>
-    <div><b>Hôpital de provenance :</b> {{ req.hospital_origin or '—' }}</div>
+    <div><b>Hôpital :</b> {{ req.hospital_origin or '—' }}</div>
     <div><b>Service :</b> {{ req.requesting_service or '—' }}</div>
-    <div><b>Prescripteur :</b> {{ req.prescriber_name or '—' }}</div>
     <div><b>Nature du prélèvement :</b> {{ req.sample_nature or 'Urines' }}</div>
-    <div><b>Date de prélèvement :</b> {{ req.sampling_date or (req.samples[0].sampling_date if req.samples else '—') }}</div>
-    <div><b>Date de validation :</b> {{ result.validated_at.strftime('%d/%m/%Y %H:%M') if result.validated_at else '—' }}</div>
+    <div><b>Date de prélèvement :</b> {{ req.sampling_date or '—' }}</div>
+    <div><b>Prescripteur :</b> {{ req.prescriber_name or '—' }}</div>
   </div>
-  <div class="report-section"><h3>Renseignements cliniques</h3><div class="body report-grid inner-grid"><div><b>Motif :</b> {{ req.consultation_reason or '—' }}</div><div><b>Signes généraux :</b> {{ req.general_signs or '—' }}</div><div><b>Diagnostic principal :</b> {{ req.main_diagnosis or '—' }}</div><div><b>Traitement antibiotique :</b> {{ req.antibiotic_treatment or '—' }}{% if req.current_atb_duration %} — {{ req.current_atb_duration }}{% endif %}</div><div><b>Hospitalisation :</b> {{ req.currently_hospitalized or '—' }}{% if req.current_hospitalization_duration %} — {{ req.current_hospitalization_duration }}{% endif %}</div><div><b>Maladie chronique :</b> {{ req.chronic_underlying_disease or '—' }}</div></div></div>
-  <div class="report-section"><h3>Examen macroscopique</h3><div class="body"><b>Aspect :</b> {{ result.aspect or '—' }}</div></div>
-  <div class="report-section"><h3>Examen microscopique</h3><div class="body report-grid inner-grid"><div><b>Leucocytes :</b> {{ result.leukocytes or '—' }}</div><div><b>Hématies :</b> {{ result.red_cells or '—' }}</div><div><b>Cellules épithéliales :</b> {{ result.epithelial_cells or '—' }}</div><div><b>Autres éléments :</b> {{ result.other_elements or '—' }}</div></div></div>
-  <div class="report-section"><h3>Coloration de Gram</h3><div class="body">{{ result.gram_stain or '—' }}</div></div>
-  <div class="report-section"><h3>Culture</h3><div class="body"><b>Statut :</b> {{ result.culture_status or '—' }}<br><b>Germe isolé / détails :</b><br>{{ result.culture_details or '—' }}</div></div>
-  <div class="report-section"><h3>Antibiogramme</h3><div class="body">{% if result.culture_status == 'positive' %}<div class="atb-grid"><div class="atb-box sensitive"><b>Sensibles</b><hr>{% for a in groups.S %}{{ a.antibiotic }}{% if a.diameter %} ({{ a.diameter }} mm){% endif %}<br>{% else %}—{% endfor %}</div><div class="atb-box intermediate"><b>Intermédiaires</b><hr>{% for a in groups.I %}{{ a.antibiotic }}{% if a.diameter %} ({{ a.diameter }} mm){% endif %}<br>{% else %}—{% endfor %}</div><div class="atb-box resistant"><b>Résistants</b><hr>{% for a in groups.R %}{{ a.antibiotic }}{% if a.diameter %} ({{ a.diameter }} mm){% endif %}<br>{% else %}—{% endfor %}</div></div><div class="small text-muted mt-2">S = sensible ; I = sensible à exposition augmentée ; R = résistant.</div>{% else %}<div class="text-muted fw-bold">Non applicable.</div>{% endif %}</div></div>
-  <div class="report-section"><h3>Conclusion</h3><div class="body conclusion-box">{{ result.conclusion or '—' }}</div></div>
-  <div class="validation-footer"><div class="small text-muted">Ce compte rendu est valable après validation biologique.</div><div class="signature"><span class="line"><b>Validation</b><br>{{ result.electronic_signature or '—' }}<br>{{ result.validated_at.strftime('%d/%m/%Y %H:%M') if result.validated_at else '—' }}</span></div></div>
+  <div class="report-section compact-section"><h3>Renseignements cliniques</h3><div class="body report-grid flat-grid compact-grid">
+    <div><b>Motif :</b> {{ req.consultation_reason or '—' }}</div>
+    <div><b>Diagnostic :</b> {{ req.primary_diagnosis or '—' }}</div>
+    <div><b>Traitement ATB :</b> {{ req.antibiotic_treatment or '—' }}{% if req.current_atb_duration %} — {{ req.current_atb_duration }}{% endif %}</div>
+  </div></div>
+  <div class="report-section compact-section"><h3>Examen direct</h3><div class="body report-grid flat-grid compact-grid"><div><b>Aspect :</b> {{ result.aspect or '—' }}</div><div><b>Leucocytes :</b> {{ result.leukocytes or '—' }}</div><div><b>Hématies :</b> {{ result.red_cells or '—' }}</div><div><b>Cellules épithéliales :</b> {{ result.epithelial_cells or '—' }}</div><div><b>Autres éléments :</b> {{ result.other_elements or '—' }}</div><div><b>Gram :</b> {{ result.gram_stain or '—' }}</div></div></div>
+  <div class="report-section compact-section"><h3>Culture</h3><div class="body"><b>Résultat :</b> {{ result.culture_status or '—' }}{% if result.culture_status == 'positive' %}<br><b>Germe isolé :</b> {{ result.culture_details or '—' }}{% endif %}</div></div>
+  {% if result.culture_status == 'positive' %}
+  <div class="report-section compact-section"><h3>Antibiogramme</h3><div class="body">
+    <div class="atb-grid compact-atb"><div class="atb-box sensitive"><b>Sensibles</b><hr>{% for a in groups.S %}{{ a.antibiotic }}{% if a.diameter %} ({{ a.diameter }} mm){% endif %}<br>{% else %}—{% endfor %}</div><div class="atb-box intermediate"><b>Intermédiaires</b><hr>{% for a in groups.I %}{{ a.antibiotic }}{% if a.diameter %} ({{ a.diameter }} mm){% endif %}<br>{% else %}—{% endfor %}</div><div class="atb-box resistant"><b>Résistants</b><hr>{% for a in groups.R %}{{ a.antibiotic }}{% if a.diameter %} ({{ a.diameter }} mm){% endif %}<br>{% else %}—{% endfor %}</div></div>
+    <div class="small text-muted mt-1">S = sensible ; I = sensible à exposition augmentée ; R = résistant.</div>
+  </div></div>
+  {% endif %}
+  <div class="report-section compact-section"><h3>Conclusion</h3><div class="body conclusion-box compact-conclusion">{{ result.conclusion or '—' }}</div></div>
+  <div class="validation-footer compact-footer"><div class="small text-muted">Compte rendu établi après validation biologique.</div><div class="signature"><span class="line"><b>Validation biologique</b><br>{{ result.validated_at or '—' }}</span></div></div>
 </div>
 {% endblock %}
