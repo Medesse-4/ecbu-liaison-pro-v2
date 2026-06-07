@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SelectField, TextAreaField, BooleanField, DateField, TimeField, SubmitField
 from wtforms.validators import DataRequired, Email, Length, Optional, EqualTo
 
-ROLES = [("prescripteur", "Prescripteur"), ("laboratoire", "Laboratoire"), ("Laboratoire")]
+ROLES = [("prescripteur", "Prescripteur"), ("laboratoire", "Laboratoire")]
 
 YES_NO = [("non", "Non"), ("oui", "Oui"), ("non_renseigne", "Non renseigné")]
 
